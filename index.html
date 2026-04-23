@@ -3,625 +3,521 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>C-Charging · Cargadores</title>
+<title>C-Charging</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-    font-family: 'DM Sans', sans-serif;
-    color: #e2e8f0;
-  }
-  button { cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  input { font-family: 'DM Sans', sans-serif; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);font-family:'DM Sans',sans-serif;color:#e2e8f0}
+button{cursor:pointer;font-family:'DM Sans',sans-serif}
+input{font-family:'DM Sans',sans-serif}
 
-  #toast {
-    display: none;
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    color: #fff; padding: 12px 24px; border-radius: 12px;
-    font-weight: 700; z-index: 9999; font-size: 15px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4); white-space: nowrap;
-    pointer-events: none;
-  }
+#toast{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;z-index:9999;font-size:15px;box-shadow:0 8px 32px rgba(0,0,0,.4);white-space:nowrap;pointer-events:none}
 
-  #modal-overlay {
-    display: none;
-    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-    align-items: center; justify-content: center;
-    z-index: 1000; padding: 20px;
-  }
-  #modal-overlay.open { display: flex; }
-  #modal-box {
-    background: #1e293b; border: 1px solid #334155;
-    border-radius: 20px; padding: 28px; width: 100%;
-    max-width: 340px; box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-  }
-  .modal-icon { font-size: 36px; text-align: center; margin-bottom: 12px; }
-  .modal-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 8px; }
-  .modal-sub { color: #94a3b8; font-size: 14px; text-align: center; margin-bottom: 8px; }
-  .modal-user { color: #64748b; font-size: 13px; text-align: center; margin-bottom: 20px; }
-  .modal-user strong { color: #e2e8f0; }
-  #modal-debug {
-    display: none;
-    background: #450a0a; border: 1px solid #ef4444;
-    border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;
-    font-size: 11px; color: #fca5a5; word-break: break-all;
-  }
-  .modal-btn-primary {
-    display: block; width: 100%; padding: 14px;
-    background: #22c55e; color: #fff; border: none;
-    border-radius: 9px; font-size: 16px; font-weight: 700;
-    margin-bottom: 10px; touch-action: manipulation;
-  }
-  .modal-btn-primary.blue { background: #3b82f6; }
-  .modal-btn-secondary {
-    display: block; width: 100%; padding: 12px;
-    background: #0f172a; color: #94a3b8;
-    border: 1px solid #334155; border-radius: 9px;
-    font-size: 15px; font-weight: 600; touch-action: manipulation;
-  }
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:1000;padding:20px}
+#overlay.open{display:flex}
+#modal{background:#1e293b;border:1px solid #334155;border-radius:20px;padding:28px;width:100%;max-width:340px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+#modal-icon{font-size:36px;text-align:center;margin-bottom:12px}
+#modal-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px}
+#modal-sub{color:#94a3b8;font-size:14px;text-align:center;margin-bottom:8px}
+#modal-user{color:#64748b;font-size:13px;text-align:center;margin-bottom:20px}
+#modal-user b{color:#e2e8f0}
+#modal-debug{display:none;background:#450a0a;border:1px solid #ef4444;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#fca5a5;word-break:break-all}
+#modal-confirm{display:block;width:100%;padding:14px;border:none;border-radius:9px;font-size:16px;font-weight:700;margin-bottom:10px;touch-action:manipulation;color:#fff;background:#22c55e}
+#modal-cancel{display:block;width:100%;padding:12px;background:#0f172a;color:#94a3b8;border:1px solid #334155;border-radius:9px;font-size:15px;font-weight:600;touch-action:manipulation}
 
-  header {
-    background: rgba(15,23,42,0.9);
-    border-bottom: 1px solid #1e293b;
-    padding: 16px 20px; position: sticky; top: 0; z-index: 100;
-  }
-  .header-inner {
-    max-width: 900px; margin: 0 auto;
-    display: flex; align-items: center;
-    justify-content: space-between; flex-wrap: wrap; gap: 10px;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-icon { font-size: 26px; }
-  .brand-name { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 17px; }
-  .brand-status { font-size: 11px; }
-  .stats { display: flex; gap: 14px; }
-  .stat { text-align: center; }
-  .stat-val { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
-  .stat-lbl { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+header{background:rgba(15,23,42,.9);border-bottom:1px solid #1e293b;padding:16px 20px;position:sticky;top:0;z-index:100}
+.hdr{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-name{font-family:'Space Mono',monospace;font-weight:700;font-size:17px}
+#conn{font-size:11px;color:#f59e0b}
+.stats{display:flex;gap:14px}
+.stat{text-align:center}
+.sv{font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
+.sl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
 
-  main { max-width: 900px; margin: 0 auto; padding: 20px 14px; }
+main{max-width:900px;margin:0 auto;padding:20px 14px}
+.ibox{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.iwrap{flex:1;min-width:180px}
+.ilabel{font-size:11px;color:#64748b;display:block;margin-bottom:5px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+#name-input{width:100%;background:#0f172a;border:1px solid #334155;border-radius:9px;padding:10px 13px;color:#e2e8f0;font-size:15px;outline:none}
+#main-btn{flex-shrink:0;padding:10px 18px;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;touch-action:manipulation}
+#refresh-btn{flex-shrink:0;padding:10px 14px;background:#1e293b;color:#64748b;border:1px solid #334155;border-radius:9px;font-size:14px;touch-action:manipulation}
 
-  .input-box {
-    background: #1e293b; border: 1px solid #334155;
-    border-radius: 14px; padding: 16px; margin-bottom: 20px;
-    display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
-  }
-  .input-wrap { flex: 1; min-width: 180px; }
-  .input-label {
-    font-size: 11px; color: #64748b; display: block;
-    margin-bottom: 5px; font-weight: 700;
-    letter-spacing: 1px; text-transform: uppercase;
-  }
-  #name-input {
-    width: 100%; background: #0f172a; border: 1px solid #334155;
-    border-radius: 9px; padding: 10px 13px; color: #e2e8f0;
-    font-size: 15px; outline: none;
-  }
-  #main-btn {
-    flex-shrink: 0; padding: 10px 18px;
-    background: #22c55e; color: #fff; border: none;
-    border-radius: 9px; font-size: 14px; font-weight: 700;
-    touch-action: manipulation;
-  }
+#alert-box{display:none;background:linear-gradient(135deg,#451a03,#78350f);border:1px solid #f59e0b;border-radius:12px;padding:12px 18px;margin-bottom:18px;align-items:center;gap:10px}
+#alert-box.show{display:flex}
+.al-icon{font-size:22px}
+.al-title{font-weight:700;color:#fbbf24;font-size:14px}
+.al-sub{font-size:13px;color:#fcd34d}
 
-  #alert-box {
-    display: none;
-    background: linear-gradient(135deg,#451a03,#78350f);
-    border: 1px solid #f59e0b; border-radius: 12px;
-    padding: 12px 18px; margin-bottom: 18px;
-    align-items: center; gap: 10px;
-  }
-  #alert-box.show { display: flex; }
-  .alert-icon { font-size: 22px; }
-  .alert-title { font-weight: 700; color: #fbbf24; font-size: 14px; }
-  .alert-sub { font-size: 13px; color: #fcd34d; }
+.sec-title{font-size:12px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
 
-  .section-title {
-    font-size: 12px; font-weight: 700; color: #64748b;
-    letter-spacing: 1px; text-transform: uppercase;
-    margin-bottom: 12px;
-  }
+.card{border-radius:13px;padding:14px 12px;cursor:pointer;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.card:active{transform:scale(.97)}
+.card.free{background:linear-gradient(135deg,#051a0a,#0a2010);border:1.5px solid #14532d}
+.card.occ{background:linear-gradient(135deg,#1e0a0a,#2d1010);border:1.5px solid #7f1d1d}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.card-num{font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
+.badge{font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 6px;border-radius:20px}
+.badge.free{background:rgba(34,197,94,.2);color:#4ade80}
+.badge.occ{background:rgba(239,68,68,.2);color:#f87171;animation:pulse 2s ease infinite}
+.card-icon{font-size:26px;text-align:center;margin-bottom:6px}
+.card-uname{font-size:11px;font-weight:700;color:#fca5a5;text-align:center;margin-bottom:1px}
+.card-ago{font-size:9px;color:#7f1d1d;text-align:center}
+.card-hint{font-size:9px;color:#6b7280;text-align:center;margin-top:4px}
+.card-hint.fh{font-size:10px;color:#166534;margin-top:2px}
 
-  #charger-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 10px; margin-bottom: 20px;
-  }
-  .charger-card {
-    border-radius: 13px; padding: 14px 12px;
-    cursor: pointer; user-select: none;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .charger-card:active { transform: scale(0.97); }
-  .charger-card.free {
-    background: linear-gradient(135deg,#051a0a,#0a2010);
-    border: 1.5px solid #14532d;
-  }
-  .charger-card.occupied {
-    background: linear-gradient(135deg,#1e0a0a,#2d1010);
-    border: 1.5px solid #7f1d1d;
-  }
-  .card-top {
-    display: flex; justify-content: space-between;
-    align-items: flex-start; margin-bottom: 8px;
-  }
-  .card-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px; font-weight: 700;
-  }
-  .card-badge {
-    font-size: 7px; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; padding: 3px 6px; border-radius: 20px;
-  }
-  .card-badge.free { background: rgba(34,197,94,0.2); color: #4ade80; }
-  .card-badge.occupied {
-    background: rgba(239,68,68,0.2); color: #f87171;
-    animation: pulse 2s ease infinite;
-  }
-  .card-icon { font-size: 26px; text-align: center; margin-bottom: 6px; }
-  .card-user { font-size: 11px; font-weight: 700; color: #fca5a5; text-align: center; margin-bottom: 1px; }
-  .card-time { font-size: 9px; color: #7f1d1d; text-align: center; }
-  .card-hint { font-size: 9px; color: #6b7280; text-align: center; margin-top: 4px; }
-  .card-hint.free-hint { font-size: 10px; color: #166534; margin-top: 2px; }
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:16px}
+.panel-title{font-size:12px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.empty{color:#475569;font-size:13px;text-align:center;padding:16px 0}
 
-  .bottom-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  }
-  .panel {
-    background: #1e293b; border: 1px solid #334155;
-    border-radius: 14px; padding: 16px;
-  }
-  .panel-title {
-    font-size: 12px; font-weight: 700; color: #64748b;
-    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;
-  }
-  .panel-empty { color: #475569; font-size: 13px; text-align: center; padding: 16px 0; }
+.qi{display:flex;align-items:center;gap:8px;border-radius:9px;padding:9px 12px;margin-bottom:7px}
+.qi.first{background:rgba(245,158,11,.1);border:1px solid #f59e0b}
+.qi.rest{background:#0f172a;border:1px solid #1e293b}
+.qnum{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.qnum.first{background:#f59e0b;color:#000}
+.qnum.rest{background:#334155;color:#94a3b8}
+.qname{font-weight:600;font-size:13px}
+.qtime{font-size:10px;color:#64748b}
+.qrm{background:none;border:none;color:#475569;font-size:18px;padding:2px 5px;touch-action:manipulation;flex-shrink:0}
 
-  .queue-item {
-    display: flex; align-items: center; gap: 8px;
-    border-radius: 9px; padding: 9px 12px; margin-bottom: 7px;
-  }
-  .queue-item.first {
-    background: rgba(245,158,11,0.1); border: 1px solid #f59e0b;
-  }
-  .queue-item.rest {
-    background: #0f172a; border: 1px solid #1e293b;
-  }
-  .queue-num {
-    width: 22px; height: 22px; border-radius: 5px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; flex-shrink: 0;
-  }
-  .queue-num.first { background: #f59e0b; color: #000; }
-  .queue-num.rest { background: #334155; color: #94a3b8; }
-  .queue-name { flex: 1; font-weight: 600; font-size: 13px; }
-  .queue-time { font-size: 10px; color: #64748b; }
-  .queue-remove {
-    background: none; border: none; color: #475569;
-    font-size: 18px; padding: 2px 5px; touch-action: manipulation;
-  }
+.log-scroll{max-height:260px;overflow-y:auto}
+.li{display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #0f172a}
+.lmsg{color:#cbd5e1}
+.ltime{color:#475569;font-size:10px;flex-shrink:0}
 
-  .log-list { max-height: 260px; overflow-y: auto; }
-  .log-item {
-    display: flex; justify-content: space-between; gap: 6px;
-    font-size: 12px; padding: 5px 0;
-    border-bottom: 1px solid #0f172a;
-  }
-  .log-msg { color: #cbd5e1; }
-  .log-time { color: #475569; font-size: 10px; flex-shrink: 0; }
-
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: #0f172a; }
-  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
-
-  @media (max-width: 500px) {
-    .bottom-grid { grid-template-columns: 1fr; }
-  }
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#0f172a}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media(max-width:500px){.bgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <div id="toast"></div>
 
-<!-- Modal -->
-<div id="modal-overlay">
-  <div id="modal-box">
-    <div class="modal-icon" id="modal-icon"></div>
-    <div class="modal-title" id="modal-title"></div>
-    <div class="modal-sub" id="modal-sub"></div>
-    <div class="modal-user" id="modal-user"></div>
+<div id="overlay">
+  <div id="modal">
+    <div id="modal-icon"></div>
+    <div id="modal-title"></div>
+    <div id="modal-sub"></div>
+    <div id="modal-user"></div>
     <div id="modal-debug"></div>
-    <button class="modal-btn-primary" id="modal-confirm-btn"></button>
-    <button class="modal-btn-secondary" id="modal-cancel-btn">Cancelar</button>
+    <button id="modal-confirm"></button>
+    <button id="modal-cancel">Cancelar</button>
   </div>
 </div>
 
 <header>
-  <div class="header-inner">
+  <div class="hdr">
     <div class="brand">
-      <span class="brand-icon">⚡</span>
+      <span style="font-size:26px">⚡</span>
       <div>
         <div class="brand-name">C-Charging</div>
-        <div class="brand-status" id="status-dot">● Conectando...</div>
+        <div id="conn">● Conectando...</div>
       </div>
     </div>
     <div class="stats">
-      <div class="stat">
-        <div class="stat-val" id="stat-free" style="color:#22c55e">12</div>
-        <div class="stat-lbl">Libres</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" id="stat-occ" style="color:#ef4444">0</div>
-        <div class="stat-lbl">Ocupados</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" id="stat-queue" style="color:#f59e0b">0</div>
-        <div class="stat-lbl">Cola</div>
-      </div>
+      <div class="stat"><div class="sv" id="s-free" style="color:#22c55e">12</div><div class="sl">Libres</div></div>
+      <div class="stat"><div class="sv" id="s-occ" style="color:#ef4444">0</div><div class="sl">Ocupados</div></div>
+      <div class="stat"><div class="sv" id="s-q" style="color:#f59e0b">0</div><div class="sl">Cola</div></div>
     </div>
   </div>
 </header>
 
 <main>
-  <div class="input-box">
-    <div class="input-wrap">
-      <label class="input-label" for="name-input">Tu nombre</label>
+  <div class="ibox">
+    <div class="iwrap">
+      <label class="ilabel" for="name-input">Tu nombre</label>
       <input id="name-input" type="text" placeholder="Ej: María García" autocomplete="off" />
     </div>
-    <button id="main-btn" ontouchstart="">⚡ Elige cargador</button>
+    <button id="main-btn" style="background:#22c55e">⚡ Elige cargador</button>
+    <button id="refresh-btn">🔄 Actualizar</button>
   </div>
 
   <div id="alert-box">
-    <span class="alert-icon">🔔</span>
+    <span class="al-icon">🔔</span>
     <div>
-      <div class="alert-title">¡Cargador disponible!</div>
-      <div class="alert-sub" id="alert-name"></div>
+      <div class="al-title">¡Cargador disponible!</div>
+      <div class="al-sub" id="alert-name"></div>
     </div>
   </div>
 
-  <div class="section-title">Cargadores</div>
-  <div id="charger-grid"></div>
+  <div class="sec-title">Cargadores</div>
+  <div id="grid"></div>
 
-  <div class="bottom-grid">
+  <div class="bgrid">
     <div class="panel">
-      <div class="panel-title" id="queue-title">⏳ Cola (0)</div>
-      <div id="queue-list"></div>
+      <div class="panel-title" id="q-title">⏳ Cola (0)</div>
+      <div id="q-list"></div>
     </div>
     <div class="panel">
       <div class="panel-title">📋 Actividad</div>
-      <div id="log-list" class="log-list"></div>
+      <div id="log-list"></div>
     </div>
   </div>
 </main>
 
 <script>
-const PROJECT_ID = "c-charging";
-const API_KEY = "AIzaSyC8LUsTWXxVLR9uZD357iYbnexwJPSnewU";
-const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
-const TOTAL = 12;
+(function() {
+  var PROJECT = "c-charging";
+  var KEY = "AIzaSyC8LUsTWXxVLR9uZD357iYbnexwJPSnewU";
+  var BASE = "https://firestore.googleapis.com/v1/projects/" + PROJECT + "/databases/(default)/documents";
+  var TOTAL = 12;
+  // Poll every 30 seconds — enough for this use case, avoids 429
+  var POLL_MS = 30000;
 
-let state = {
-  chargers: Array.from({length: TOTAL}, (_,i) => ({id:i+1, occupied:false, user:null, since:null})),
-  queue: [],
-  log: [],
-};
-let modalType = null;
-let modalChargerId = null;
-let busy = false;
+  var st = { chargers: mkChargers(), queue: [], log: [] };
+  var modalType = null;
+  var modalId = null;
+  var busy = false;
+  var toastTimer = null;
+  var pollTimer = null;
 
-// ── Firestore helpers ──────────────────────────────────────────
-async function fsGet(col) {
-  const r = await fetch(`${BASE}/${col}?key=${API_KEY}`);
-  if (!r.ok) return [];
-  const data = await r.json();
-  return (data.documents || []).map(docToObj);
-}
-
-async function fsSet(col, id, fields) {
-  const r = await fetch(`${BASE}/${col}/${id}?key=${API_KEY}`, {
-    method: "PATCH",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({fields: objToFields(fields)}),
-  });
-  if (!r.ok) {
-    const err = await r.json().catch(()=>({}));
-    throw new Error(`HTTP ${r.status}: ${JSON.stringify(err)}`);
+  // ── Firestore helpers ──
+  function get(col) {
+    return fetch(BASE + "/" + col + "?key=" + KEY)
+      .then(function(r) {
+        if (r.status === 429) throw new Error("429");
+        return r.ok ? r.json() : {documents:[]};
+      })
+      .then(function(d) { return (d.documents || []).map(toObj); });
   }
-}
 
-async function fsDel(col, id) {
-  await fetch(`${BASE}/${col}/${id}?key=${API_KEY}`, {method:"DELETE"});
-}
-
-function docToObj(doc) {
-  const obj = {};
-  for (const [k,v] of Object.entries(doc.fields||{})) {
-    if (v.stringValue !== undefined) obj[k] = v.stringValue;
-    else if (v.integerValue !== undefined) obj[k] = Number(v.integerValue);
-    else if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
-    else if (v.doubleValue !== undefined) obj[k] = v.doubleValue;
-  }
-  return obj;
-}
-
-function objToFields(obj) {
-  const f = {};
-  for (const [k,v] of Object.entries(obj)) {
-    if (typeof v === "string") f[k] = {stringValue: v};
-    else if (typeof v === "boolean") f[k] = {booleanValue: v};
-    else if (typeof v === "number") f[k] = {integerValue: String(Math.round(v))};
-  }
-  return f;
-}
-
-// ── Fetch & render ──────────────────────────────────────────────
-async function fetchAll() {
-  try {
-    const [cDocs, qDocs, lDocs] = await Promise.all([
-      fsGet("chargers"), fsGet("queue"), fsGet("log"),
-    ]);
-
-    const chargers = Array.from({length:TOTAL}, (_,i) => ({id:i+1, occupied:false, user:null, since:null}));
-    cDocs.forEach(d => {
-      const idx = d.id - 1;
-      if (idx >= 0 && idx < TOTAL) chargers[idx] = {...chargers[idx], ...d, occupied:true};
+  function set(col, id, fields) {
+    return fetch(BASE + "/" + col + "/" + encodeURIComponent(id) + "?key=" + KEY, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({fields: toFields(fields)})
+    }).then(function(r) {
+      if (r.status === 429) throw new Error("Demasiadas peticiones. Espera unos segundos e inténtalo de nuevo.");
+      if (!r.ok) return r.json().then(function(e) { throw new Error("Error " + r.status + ": " + JSON.stringify(e)); });
+      return true;
     });
-    qDocs.sort((a,b) => a.ts - b.ts);
-    lDocs.sort((a,b) => b.ts - a.ts);
-
-    state.chargers = chargers;
-    state.queue = qDocs;
-    state.log = lDocs.slice(0,25);
-
-    render();
-    setStatus(true);
-  } catch(e) {
-    setStatus(false);
-  }
-}
-
-async function addLog(msg) {
-  const ts = Date.now();
-  await fsSet("log", String(ts), {msg, ts});
-}
-
-function setStatus(ok) {
-  const el = document.getElementById("status-dot");
-  el.textContent = ok ? "● En tiempo real" : "● Sin conexión";
-  el.style.color = ok ? "#22c55e" : "#ef4444";
-}
-
-function timeAgo(ts) {
-  if (!ts) return "";
-  const diff = Math.floor((Date.now() - ts) / 60000);
-  if (diff < 1) return "hace un momento";
-  if (diff === 1) return "hace 1 min";
-  return `hace ${diff} min`;
-}
-
-function formatTime(ts) {
-  if (!ts) return "";
-  return new Date(ts).toLocaleTimeString("es-ES", {hour:"2-digit", minute:"2-digit"});
-}
-
-function render() {
-  const {chargers, queue, log} = state;
-  const freeCount = chargers.filter(c => !c.occupied).length;
-  const occCount = TOTAL - freeCount;
-
-  document.getElementById("stat-free").textContent = freeCount;
-  document.getElementById("stat-occ").textContent = occCount;
-  document.getElementById("stat-queue").textContent = queue.length;
-
-  // Main button
-  const mainBtn = document.getElementById("main-btn");
-  if (freeCount > 0) {
-    mainBtn.textContent = "⚡ Elige cargador";
-    mainBtn.style.background = "#22c55e";
-  } else {
-    mainBtn.textContent = "⏳ Unirme a la cola";
-    mainBtn.style.background = "#f59e0b";
   }
 
-  // Alert
-  const alert = document.getElementById("alert-box");
-  if (queue.length > 0 && freeCount > 0) {
-    alert.classList.add("show");
-    document.getElementById("alert-name").textContent = `${queue[0].name}, es tu turno.`;
-  } else {
-    alert.classList.remove("show");
+  function del(col, id) {
+    return fetch(BASE + "/" + col + "/" + encodeURIComponent(id) + "?key=" + KEY, {method:"DELETE"})
+      .catch(function(){});
   }
 
-  // Charger grid
-  const grid = document.getElementById("charger-grid");
-  grid.innerHTML = "";
-  chargers.forEach(c => {
-    const div = document.createElement("div");
-    div.className = `charger-card ${c.occupied ? "occupied" : "free"}`;
-    div.innerHTML = `
-      <div class="card-top">
-        <span class="card-num" style="color:${c.occupied?"#f87171":"#4ade80"}">#${String(c.id).padStart(2,"0")}</span>
-        <span class="card-badge ${c.occupied?"occupied":"free"}">${c.occupied?"ocupado":"libre"}</span>
-      </div>
-      <div class="card-icon">${c.occupied?"🔌":"⚡"}</div>
-      ${c.occupied
-        ? `<div class="card-user">${c.user||""}</div>
-           <div class="card-time">${timeAgo(c.since)}</div>
-           <div class="card-hint">Toca para liberar</div>`
-        : `<div class="card-hint free-hint">Toca para ocupar</div>`
-      }
-    `;
-    div.addEventListener("click", () => onCardClick(c));
-    grid.appendChild(div);
+  function toObj(doc) {
+    var obj = {};
+    var f = doc.fields || {};
+    Object.keys(f).forEach(function(k) {
+      var v = f[k];
+      if (v.stringValue !== undefined) obj[k] = v.stringValue;
+      else if (v.integerValue !== undefined) obj[k] = Number(v.integerValue);
+      else if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
+      else if (v.doubleValue !== undefined) obj[k] = v.doubleValue;
+    });
+    return obj;
+  }
+
+  function toFields(obj) {
+    var f = {};
+    Object.keys(obj).forEach(function(k) {
+      var v = obj[k];
+      if (typeof v === "string") f[k] = {stringValue: v};
+      else if (typeof v === "boolean") f[k] = {booleanValue: v};
+      else if (typeof v === "number") f[k] = {integerValue: String(Math.round(v))};
+    });
+    return f;
+  }
+
+  // ── Helpers ──
+  function mkChargers() {
+    var a = [];
+    for (var i = 0; i < TOTAL; i++) a.push({id:i+1, occupied:false, user:null, since:null});
+    return a;
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return "";
+    var d = Math.floor((Date.now() - ts) / 60000);
+    if (d < 1) return "hace un momento";
+    if (d === 1) return "hace 1 min";
+    return "hace " + d + " min";
+  }
+
+  function fmtTime(ts) {
+    if (!ts) return "";
+    return new Date(ts).toLocaleTimeString("es-ES", {hour:"2-digit", minute:"2-digit"});
+  }
+
+  function toast(msg, color) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.style.background = color || "#22c55e";
+    el.style.display = "block";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { el.style.display = "none"; }, 3500);
+  }
+
+  function showDebug(msg) {
+    var el = document.getElementById("modal-debug");
+    el.textContent = "❌ " + msg;
+    el.style.display = "block";
+  }
+
+  function setConn(ok) {
+    var el = document.getElementById("conn");
+    el.textContent = ok ? "● Actualizado" : "● Sin conexión";
+    el.style.color = ok ? "#22c55e" : "#ef4444";
+  }
+
+  // ── Fetch ──
+  function fetchAll() {
+    // Fetch sequentially to avoid hammering the API
+    return get("chargers")
+      .then(function(cDocs) {
+        var chargers = mkChargers();
+        cDocs.forEach(function(d) {
+          var idx = d.id - 1;
+          if (idx >= 0 && idx < TOTAL) chargers[idx] = Object.assign({}, chargers[idx], d, {occupied:true});
+        });
+        st.chargers = chargers;
+        return get("queue");
+      })
+      .then(function(qDocs) {
+        qDocs.sort(function(a,b){return a.ts-b.ts;});
+        st.queue = qDocs;
+        return get("log");
+      })
+      .then(function(lDocs) {
+        lDocs.sort(function(a,b){return b.ts-a.ts;});
+        st.log = lDocs.slice(0,20);
+        render();
+        setConn(true);
+      })
+      .catch(function(e) {
+        console.error("fetchAll error:", e);
+        setConn(false);
+      });
+  }
+
+  function addLog(msg) {
+    var ts = Date.now();
+    return set("log", String(ts), {msg:msg, ts:ts});
+  }
+
+  function schedulePoll() {
+    clearTimeout(pollTimer);
+    pollTimer = setTimeout(function() {
+      fetchAll().then(schedulePoll);
+    }, POLL_MS);
+  }
+
+  // ── Render ──
+  function render() {
+    var chargers = st.chargers, queue = st.queue, log = st.log;
+    var free = chargers.filter(function(c){return !c.occupied;}).length;
+
+    document.getElementById("s-free").textContent = free;
+    document.getElementById("s-occ").textContent = TOTAL - free;
+    document.getElementById("s-q").textContent = queue.length;
+
+    var mb = document.getElementById("main-btn");
+    if (free > 0) { mb.textContent = "⚡ Elige cargador"; mb.style.background = "#22c55e"; }
+    else { mb.textContent = "⏳ Unirme a la cola"; mb.style.background = "#f59e0b"; }
+
+    var ab = document.getElementById("alert-box");
+    if (queue.length > 0 && free > 0) {
+      ab.classList.add("show");
+      document.getElementById("alert-name").textContent = queue[0].name + ", es tu turno.";
+    } else { ab.classList.remove("show"); }
+
+    // Grid
+    var grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    chargers.forEach(function(c) {
+      var div = document.createElement("div");
+      div.className = "card " + (c.occupied ? "occ" : "free");
+      div.innerHTML =
+        '<div class="card-top">' +
+          '<span class="card-num" style="color:' + (c.occupied?"#f87171":"#4ade80") + '">#' + String(c.id).padStart(2,"0") + '</span>' +
+          '<span class="badge ' + (c.occupied?"occ":"free") + '">' + (c.occupied?"ocupado":"libre") + '</span>' +
+        '</div>' +
+        '<div class="card-icon">' + (c.occupied?"🔌":"⚡") + '</div>' +
+        (c.occupied
+          ? '<div class="card-uname">' + (c.user||"") + '</div><div class="card-ago">' + timeAgo(c.since) + '</div><div class="card-hint">Toca para liberar</div>'
+          : '<div class="card-hint fh">Toca para ocupar</div>');
+      (function(card) {
+        div.addEventListener("click", function() { onCard(card); });
+      })(c);
+      grid.appendChild(div);
+    });
+
+    // Queue
+    document.getElementById("q-title").textContent = "⏳ Cola (" + queue.length + ")";
+    var ql = document.getElementById("q-list");
+    if (queue.length === 0) {
+      ql.innerHTML = '<p class="empty">' + free + ' libre' + (free!==1?"s":"") + ' · sin espera</p>';
+    } else {
+      ql.innerHTML = "";
+      queue.forEach(function(q, i) {
+        var div = document.createElement("div");
+        div.className = "qi " + (i===0?"first":"rest");
+        div.innerHTML =
+          '<div class="qnum ' + (i===0?"first":"rest") + '">' + (i+1) + '</div>' +
+          '<div style="flex:1"><div class="qname">' + q.name + '</div><div class="qtime">' + fmtTime(q.ts) + '</div></div>';
+        var btn = document.createElement("button");
+        btn.className = "qrm";
+        btn.textContent = "×";
+        (function(name) { btn.addEventListener("click", function() { leaveQueue(name); }); })(q.name);
+        div.appendChild(btn);
+        ql.appendChild(div);
+      });
+    }
+
+    // Log
+    var ll = document.getElementById("log-list");
+    if (log.length === 0) {
+      ll.innerHTML = '<p class="empty">Sin actividad aún</p>';
+    } else {
+      ll.innerHTML = '<div class="log-scroll">' +
+        log.map(function(l,i) {
+          return '<div class="li" style="opacity:' + Math.max(1-i*0.05,0.3) + '">' +
+            '<span class="lmsg">' + l.msg + '</span>' +
+            '<span class="ltime">' + fmtTime(l.ts) + '</span></div>';
+        }).join("") + '</div>';
+    }
+  }
+
+  // ── Card click ──
+  function onCard(c) {
+    var name = document.getElementById("name-input").value.trim();
+    if (!name) { toast("Escribe tu nombre primero", "#ef4444"); return; }
+    modalType = c.occupied ? "free" : "occupy";
+    modalId = c.id;
+    openModal(name);
+  }
+
+  function openModal(name) {
+    document.getElementById("modal-debug").style.display = "none";
+    document.getElementById("modal-debug").textContent = "";
+    var btn = document.getElementById("modal-confirm");
+    if (modalType === "occupy") {
+      document.getElementById("modal-icon").textContent = "🔌";
+      document.getElementById("modal-title").textContent = "Cargador #" + modalId;
+      document.getElementById("modal-sub").textContent = "¿Confirmas que vas a conectar tu vehículo?";
+      document.getElementById("modal-user").innerHTML = "Usuario: <b>" + name + "</b>";
+      btn.textContent = "✅ Confirmar";
+      btn.style.background = "#22c55e";
+    } else {
+      document.getElementById("modal-icon").textContent = "🔓";
+      document.getElementById("modal-title").textContent = "Liberar #" + modalId;
+      document.getElementById("modal-sub").textContent = "¿Has terminado de cargar?";
+      document.getElementById("modal-user").textContent = "";
+      btn.textContent = "🔓 Liberar cargador";
+      btn.style.background = "#3b82f6";
+    }
+    document.getElementById("overlay").classList.add("open");
+  }
+
+  function closeModal() {
+    document.getElementById("overlay").classList.remove("open");
+    busy = false;
+  }
+
+  // ── Confirm ──
+  document.getElementById("modal-confirm").addEventListener("click", function() {
+    if (busy) return;
+    busy = true;
+    var btn = document.getElementById("modal-confirm");
+    var name = document.getElementById("name-input").value.trim();
+
+    if (modalType === "occupy") {
+      btn.textContent = "Guardando...";
+      var id = modalId;
+      set("chargers", String(id), {id:id, occupied:true, user:name, since:Date.now()})
+        .then(function() {
+          var inQ = st.queue.find(function(q){return q.name===name;});
+          if (inQ) return del("queue", name);
+        })
+        .then(function() { return addLog("🔌 " + name + " conectó en cargador #" + id); })
+        .then(function() {
+          // Update local state immediately without waiting for fetch
+          var idx = id - 1;
+          st.chargers[idx] = {id:id, occupied:true, user:name, since:Date.now()};
+          render();
+          toast("✅ Cargador #" + id + " ocupado", "#22c55e");
+          closeModal();
+          // Fetch in background after a delay
+          setTimeout(fetchAll, 3000);
+        })
+        .catch(function(e) {
+          showDebug(e.message);
+          btn.textContent = "✅ Confirmar";
+          busy = false;
+        });
+
+    } else {
+      btn.textContent = "Liberando...";
+      var id2 = modalId;
+      var ch = st.chargers.find(function(c){return c.id===id2;});
+      del("chargers", String(id2))
+        .then(function() { return addLog("✅ Cargador #" + id2 + " liberado" + (ch&&ch.user?" por "+ch.user:"")); })
+        .then(function() {
+          // Update local state immediately
+          var idx2 = id2 - 1;
+          st.chargers[idx2] = {id:id2, occupied:false, user:null, since:null};
+          render();
+          toast("🔓 Cargador #" + id2 + " libre", "#3b82f6");
+          if (st.queue.length > 0) setTimeout(function(){toast("🔔 " + st.queue[0].name + ", ¡te toca!", "#f59e0b");}, 300);
+          closeModal();
+          setTimeout(fetchAll, 3000);
+        })
+        .catch(function(e) {
+          showDebug(e.message);
+          btn.textContent = "🔓 Liberar cargador";
+          busy = false;
+        });
+    }
   });
 
-  // Queue
-  const qTitle = document.getElementById("queue-title");
-  const qList = document.getElementById("queue-list");
-  qTitle.textContent = `⏳ Cola (${queue.length})`;
-  if (queue.length === 0) {
-    qList.innerHTML = `<p class="panel-empty">${freeCount} libre${freeCount!==1?"s":""} · sin espera</p>`;
-  } else {
-    qList.innerHTML = queue.map((q,i) => `
-      <div class="queue-item ${i===0?"first":"rest"}">
-        <div class="queue-num ${i===0?"first":"rest"}">${i+1}</div>
-        <div>
-          <div class="queue-name">${q.name}</div>
-          <div class="queue-time">${formatTime(q.ts)}</div>
-        </div>
-        <button class="queue-remove" onclick="leaveQueue('${q.name}')">×</button>
-      </div>
-    `).join("");
+  document.getElementById("modal-cancel").addEventListener("click", closeModal);
+
+  document.getElementById("main-btn").addEventListener("click", function() {
+    var name = document.getElementById("name-input").value.trim();
+    if (!name) { toast("Escribe tu nombre primero", "#ef4444"); return; }
+    var free = st.chargers.filter(function(c){return !c.occupied;}).length;
+    if (free > 0) { toast("Selecciona un cargador libre del panel ↓", "#3b82f6"); return; }
+    if (st.queue.find(function(q){return q.name===name;})) { toast("Ya estás en la cola", "#f59e0b"); return; }
+    if (st.chargers.some(function(c){return c.user===name;})) { toast("Ya tienes un cargador", "#f59e0b"); return; }
+    set("queue", name, {name:name, ts:Date.now()})
+      .then(function() { return addLog("⏳ " + name + " se unió a la cola"); })
+      .then(function() {
+        st.queue.push({name:name, ts:Date.now()});
+        render();
+        toast("📋 " + name + " añadido a la cola", "#22c55e");
+        setTimeout(fetchAll, 3000);
+      })
+      .catch(function(e) { toast("Error: " + e.message, "#ef4444"); });
+  });
+
+  document.getElementById("refresh-btn").addEventListener("click", function() {
+    var btn = document.getElementById("refresh-btn");
+    btn.textContent = "⏳";
+    fetchAll().then(function() { btn.textContent = "🔄 Actualizar"; });
+  });
+
+  function leaveQueue(name) {
+    del("queue", name)
+      .then(function() { return addLog("❌ " + name + " salió de la cola"); })
+      .then(function() {
+        st.queue = st.queue.filter(function(q){return q.name!==name;});
+        render();
+        toast(name + " salió de la cola", "#6b7280");
+        setTimeout(fetchAll, 3000);
+      });
   }
 
-  // Log
-  const logEl = document.getElementById("log-list");
-  if (log.length === 0) {
-    logEl.innerHTML = `<p class="panel-empty">Sin actividad aún</p>`;
-  } else {
-    logEl.innerHTML = `<div class="log-list">${log.map((l,i) => `
-      <div class="log-item" style="opacity:${Math.max(1-i*0.05,0.3)}">
-        <span class="log-msg">${l.msg}</span>
-        <span class="log-time">${formatTime(l.ts)}</span>
-      </div>
-    `).join("")}</div>`;
-  }
-}
-
-// ── Actions ────────────────────────────────────────────────────
-function onCardClick(c) {
-  const name = document.getElementById("name-input").value.trim();
-  if (!name) { showToast("Escribe tu nombre primero", "#ef4444"); return; }
-  modalType = c.occupied ? "free" : "occupy";
-  modalChargerId = c.id;
-  showModal(modalType, c.id, name);
-}
-
-function showModal(type, id, name) {
-  const overlay = document.getElementById("modal-overlay");
-  document.getElementById("modal-debug").style.display = "none";
-  document.getElementById("modal-debug").textContent = "";
-
-  if (type === "occupy") {
-    document.getElementById("modal-icon").textContent = "🔌";
-    document.getElementById("modal-title").textContent = `Cargador #${id}`;
-    document.getElementById("modal-sub").textContent = "¿Confirmas que vas a conectar tu vehículo?";
-    document.getElementById("modal-user").innerHTML = `Usuario: <strong>${name}</strong>`;
-    const btn = document.getElementById("modal-confirm-btn");
-    btn.textContent = "✅ Confirmar";
-    btn.className = "modal-btn-primary";
-    btn.onclick = handleOccupy;
-  } else {
-    document.getElementById("modal-icon").textContent = "🔓";
-    document.getElementById("modal-title").textContent = `Liberar #${id}`;
-    document.getElementById("modal-sub").textContent = "¿Has terminado de cargar?";
-    document.getElementById("modal-user").textContent = "";
-    const btn = document.getElementById("modal-confirm-btn");
-    btn.textContent = "🔓 Liberar cargador";
-    btn.className = "modal-btn-primary blue";
-    btn.onclick = handleFree;
-  }
-  overlay.classList.add("open");
-}
-
-function closeModal() {
-  document.getElementById("modal-overlay").classList.remove("open");
-}
-
-function showDebug(msg) {
-  const el = document.getElementById("modal-debug");
-  el.textContent = "❌ " + msg;
-  el.style.display = "block";
-}
-
-async function handleOccupy() {
-  if (busy) return;
-  const name = document.getElementById("name-input").value.trim();
-  const id = modalChargerId;
-  busy = true;
-  const btn = document.getElementById("modal-confirm-btn");
-  btn.textContent = "Guardando...";
-  try {
-    await fsSet("chargers", String(id), {id, occupied:true, user:name, since:Date.now()});
-    const inQueue = state.queue.find(q => q.name === name);
-    if (inQueue) await fsDel("queue", name);
-    await addLog(`🔌 ${name} conectó en cargador #${id}`);
-    showToast(`✅ Cargador #${id} ocupado`, "#22c55e");
-    closeModal();
-    fetchAll();
-  } catch(e) {
-    showDebug(e.message);
-    btn.textContent = "✅ Confirmar";
-  }
-  busy = false;
-}
-
-async function handleFree() {
-  if (busy) return;
-  const id = modalChargerId;
-  const charger = state.chargers.find(c => c.id === id);
-  busy = true;
-  const btn = document.getElementById("modal-confirm-btn");
-  btn.textContent = "Liberando...";
-  try {
-    await fsDel("chargers", String(id));
-    await addLog(`✅ Cargador #${id} liberado${charger?.user ? ` por ${charger.user}` : ""}`);
-    showToast(`🔓 Cargador #${id} libre`, "#3b82f6");
-    if (state.queue.length > 0) showToast(`🔔 ${state.queue[0].name}, ¡te toca!`, "#f59e0b");
-    closeModal();
-    fetchAll();
-  } catch(e) {
-    showDebug(e.message);
-    btn.textContent = "🔓 Liberar cargador";
-  }
-  busy = false;
-}
-
-async function leaveQueue(name) {
-  await fsDel("queue", name);
-  await addLog(`❌ ${name} salió de la cola`);
-  showToast(`${name} salió de la cola`, "#6b7280");
-  fetchAll();
-}
-
-document.getElementById("main-btn").addEventListener("click", async () => {
-  const name = document.getElementById("name-input").value.trim();
-  if (!name) { showToast("Escribe tu nombre primero", "#ef4444"); return; }
-  const freeCount = state.chargers.filter(c => !c.occupied).length;
-  if (freeCount > 0) {
-    showToast("Selecciona un cargador libre del panel ↓", "#3b82f6");
-    return;
-  }
-  if (state.queue.find(q => q.name === name)) { showToast("Ya estás en la cola", "#f59e0b"); return; }
-  if (state.chargers.some(c => c.user === name)) { showToast("Ya tienes un cargador ocupado", "#f59e0b"); return; }
-  await fsSet("queue", name, {name, ts: Date.now()});
-  await addLog(`⏳ ${name} se unió a la cola`);
-  showToast(`📋 ${name} añadido a la cola`, "#22c55e");
-  fetchAll();
-});
-
-document.getElementById("modal-cancel-btn").addEventListener("click", closeModal);
-
-// ── Toast ──────────────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg, color="#22c55e") {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.background = color;
-  t.style.display = "block";
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.style.display = "none"; }, 3200);
-}
-
-// ── Init ───────────────────────────────────────────────────────
-fetchAll();
-setInterval(fetchAll, 5000);
+  // ── Init ──
+  fetchAll().then(schedulePoll);
+})();
 </script>
 </body>
 </html>
